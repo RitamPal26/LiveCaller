@@ -2,32 +2,30 @@
 
 import { Authenticated, Unauthenticated } from "convex/react";
 import { SignInButton, UserButton } from "@clerk/nextjs";
+import { useStoreUser } from "@/hooks/use-store-user";
+import { AuthenticatedView } from "@/components/auth/authenticated-view";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-950 text-white">
-      {/* Shown only when logged out */}
+    <main className="flex min-h-screen flex-col items-center justify-center bg-slate-950 text-white p-4">
       <Unauthenticated>
-        <div className="flex flex-col items-center space-y-4 text-center">
-          <h1 className="text-5xl font-extrabold tracking-tight">
-            Welcome to <span className="text-blue-500">LiveCaller</span>
+        <div className="flex flex-col items-center space-y-6 text-center max-w-lg">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
+            Welcome to <span className="text-blue-500">LiveChat</span>
           </h1>
-          <p className="text-slate-400">Sign in to start messaging</p>
+          <p className="text-base md:text-lg text-slate-400">
+            Sign in to start messaging your friends in real-time.
+          </p>
           <SignInButton mode="modal">
-            <button className="rounded-md bg-blue-600 px-6 py-3 font-semibold transition-colors hover:bg-blue-700">
+            <button className="w-full sm:w-auto rounded-md bg-blue-600 px-8 py-3 text-lg font-semibold transition-colors hover:bg-blue-700">
               Sign In
             </button>
           </SignInButton>
         </div>
       </Unauthenticated>
 
-      {/* Shown only when logged in */}
       <Authenticated>
-        <div className="flex flex-col items-center space-y-4">
-          <UserButton afterSignOutUrl="/" />
-          <h2 className="text-2xl font-bold">You are logged in!</h2>
-          <p className="text-slate-400">Database sync coming next...</p>
-        </div>
+        <AuthenticatedView />
       </Authenticated>
     </main>
   );
