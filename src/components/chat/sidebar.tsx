@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
-import { api } from "../../../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { useDebounce } from "@/hooks/use-debounce";
+import { UserButton } from "@clerk/nextjs";
 
 export function Sidebar() {
   const router = useRouter();
@@ -32,6 +33,7 @@ export function Sidebar() {
     <aside className="hidden md:flex w-80 flex-col border-r border-slate-800 bg-slate-900 h-full">
       <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
         <h2 className="text-lg font-bold tracking-tight">Messages</h2>
+        <UserButton afterSignOutUrl="/" />
       </div>
 
       <div className="p-4 border-b border-slate-800">
