@@ -64,3 +64,19 @@ export const getUsers = query({
     return users;
   },
 });
+
+export const markOffline = mutation({
+  args: {
+    clerkId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", args.clerkId))
+      .unique();
+
+    if (user) {
+      await ctx.db.patch(user._id, { isOnline: false });
+    }
+  },
+});
