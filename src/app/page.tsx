@@ -10,7 +10,7 @@ export default function Home() {
       <Unauthenticated>
         <div className="flex flex-col items-center space-y-4 text-center">
           <h1 className="text-5xl font-extrabold tracking-tight">
-            Welcome to <span className="text-blue-500">LiveChat</span>
+            Welcome to <span className="text-blue-500">LiveCaller</span>
           </h1>
           <p className="text-slate-400">Sign in to start messaging</p>
           <SignInButton mode="modal">
