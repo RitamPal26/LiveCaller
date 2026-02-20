@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 export const createOrGet = mutation({
@@ -24,7 +24,7 @@ export const createOrGet = mutation({
     const existingConversation = conversations.find(
       (conv) =>
         conv.participantIds.includes(currentUser._id) &&
-        conv.participantIds.includes(args.participantId)
+        conv.participantIds.includes(args.participantId),
     );
 
     if (existingConversation) {
@@ -37,5 +37,52 @@ export const createOrGet = mutation({
     });
 
     return newConversationId;
+  },
+});
+
+export const listActive = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    const currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!currentUser) throw new Error("User not found");
+
+    const allConversations = await ctx.db.query("conversations").collect();
+
+    const myConversations = allConversations.filter((conv) =>
+      conv.participantIds.includes(currentUser._id),
+    );
+
+    const enrichedConversations = await Promise.all(
+      myConversations.map(async (conv) => {
+        const otherUserId = conv.participantIds.find(
+          (id) => id !== currentUser._id,
+        );
+        const otherUser = otherUserId ? await ctx.db.get(otherUserId) : null;
+
+        const lastMessage = await ctx.db
+          .query("messages")
+          .withIndex("by_conversationId", (q) =>
+            q.eq("conversationId", conv._id),
+          )
+          .order("desc")
+          .first();
+
+        return {
+          _id: conv._id,
+          otherUser,
+          lastMessage,
+          updatedAt: lastMessage?._creationTime || conv._creationTime,
+        };
+      }),
+    );
+
+    return enrichedConversations.sort((a, b) => b.updatedAt - a.updatedAt);
   },
 });

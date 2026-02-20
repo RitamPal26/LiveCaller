@@ -18,11 +18,13 @@ export const store = mutation({
     if (existingUser !== null) {
       if (
         existingUser.name !== identity.name ||
-        existingUser.imageUrl !== identity.pictureUrl
+        existingUser.imageUrl !== identity.pictureUrl ||
+        existingUser.isOnline === false
       ) {
         await ctx.db.patch(existingUser._id, {
           name: identity.name,
           imageUrl: identity.pictureUrl,
+          isOnline: true,
         });
       }
       return existingUser._id;
