@@ -11,7 +11,7 @@ export default function Home() {
       <Unauthenticated>
         <div className="flex flex-col items-center space-y-6 text-center max-w-lg">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
-            Welcome to <span className="text-blue-500">LiveChat</span>
+            Welcome to <span className="text-blue-500">LiveCaller</span>
           </h1>
           <p className="text-base md:text-lg text-slate-400">
             Sign in to start messaging your friends in real-time.
