@@ -1,4 +1,6 @@
 import { mutation } from "./_generated/server";
+import { query } from "./_generated/server";
+import { v } from "convex/values";
 
 export const store = mutation({
   args: {},
@@ -33,5 +35,32 @@ export const store = mutation({
       imageUrl: identity.pictureUrl,
       isOnline: true,
     });
+  },
+});
+
+export const getUsers = query({
+  args: {
+    searchTerm: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+
+    let users = await ctx.db.query("users").collect();
+
+    users = users.filter((user) => user.clerkId !== identity.subject);
+
+    if (args.searchTerm) {
+      const search = args.searchTerm.toLowerCase();
+      users = users.filter(
+        (user) =>
+          user.name?.toLowerCase().includes(search) ||
+          user.email.toLowerCase().includes(search),
+      );
+    }
+
+    return users;
   },
 });
