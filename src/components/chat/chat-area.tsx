@@ -46,6 +46,11 @@ export function ChatArea({
   const sendMessage = useMutation(api.messages.send);
   const markRead = useMutation(api.readReceipts.markRead);
 
+  const activeTypists = useQuery(api.typing.getActive, { conversationId });
+  const setTyping = useMutation(api.typing.set);
+
+  const lastPingRef = useRef(0);
+
   const handleScroll = () => {
     if (!scrollContainerRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } =
@@ -54,6 +59,37 @@ export function ChatArea({
 
     setIsAtBottom(atBottom);
     if (atBottom) setShowNewMessageButton(false);
+  };
+
+  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value;
+    setNewMessage(text);
+
+    if (text === "") {
+      setTyping({ conversationId, isTyping: false }).catch(console.error);
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastPingRef.current > 1500) {
+      lastPingRef.current = now;
+      setTyping({ conversationId, isTyping: true }).catch(console.error);
+    }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    try {
+      await sendMessage({ conversationId, content: newMessage.trim() });
+      setNewMessage("");
+      scrollToBottom();
+
+      setTyping({ conversationId, isTyping: false }).catch(console.error);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    }
   };
 
   const scrollToBottom = (smooth = true) => {
@@ -85,23 +121,9 @@ export function ChatArea({
     }
   }, [messages, conversationId, markRead]);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
-
-    try {
-      await sendMessage({ conversationId, content: newMessage.trim() });
-      setNewMessage("");
-      scrollToBottom();
-    } catch (error) {
-      console.error("Failed to send message:", error);
-    }
-  };
-
   return (
     <div className="flex h-full flex-col bg-slate-950 relative">
       <div className="flex h-16 items-center border-b border-slate-800 px-4 gap-3">
-        {/* Only shows on mobile */}
         <button
           onClick={() => router.push("/chat")}
           className="md:hidden rounded-full p-2 hover:bg-slate-800 transition-colors"
@@ -159,12 +181,26 @@ export function ChatArea({
         </button>
       )}
 
+      {activeTypists && activeTypists.length > 0 && (
+        <div className="px-4 py-2 flex items-center text-sm text-slate-400">
+          <span className="italic mr-2">
+            {activeTypists.join(", ")}{" "}
+            {activeTypists.length === 1 ? "is" : "are"} typing
+          </span>
+          <div className="flex space-x-1 items-center mb-1">
+            <div className="h-1.5 w-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+            <div className="h-1.5 w-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+            <div className="h-1.5 w-1.5 bg-slate-400 rounded-full animate-bounce"></div>
+          </div>
+        </div>
+      )}
+
       <div className="border-t border-slate-800 p-4">
         <form onSubmit={handleSendMessage} className="flex gap-2">
           <input
             type="text"
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
+            onChange={handleTyping}
             placeholder="Type a message..."
             className="flex-1 rounded-full bg-slate-900 px-4 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-slate-800"
           />

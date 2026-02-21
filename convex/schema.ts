@@ -30,6 +30,13 @@ export default defineSchema({
   readReceipts: defineTable({
     userId: v.id("users"),
     conversationId: v.id("conversations"),
-    lastReadTime: v.number(), // A timestamp of when they last opened this chat
+    lastReadTime: v.number(),
   }).index("by_user_and_conversation", ["userId", "conversationId"]),
+
+  // 5. Typing Indicators Table
+  typingIndicators: defineTable({
+    conversationId: v.id("conversations"),
+    userId: v.id("users"),
+    expiresAt: v.number(),
+  }).index("by_conversation", ["conversationId"]),
 });
