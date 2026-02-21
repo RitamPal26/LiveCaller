@@ -5,9 +5,9 @@ import { useQuery, useMutation } from "convex/react";
 import { useRouter, usePathname } from "next/navigation";
 import { api } from "@convex/_generated/api";
 import { useDebounce } from "@/hooks/use-debounce";
-import { UserButton } from "@clerk/nextjs";
 import { Id } from "@convex/_generated/dataModel";
 import { Users } from "lucide-react";
+import { UserButton, useUser } from "@clerk/nextjs";
 
 import { ConversationList } from "./conversation-list";
 import { UserAvatar } from "./user-avatar";
@@ -22,6 +22,9 @@ export function Sidebar() {
   const searchedUsers = useQuery(api.users.getUsers, {
     searchTerm: debouncedSearchTerm,
   });
+
+  const { user: clerkUser } = useUser();
+
   const activeConversations = useQuery(api.conversations.listActive);
   const createOrGetConversation = useMutation(api.conversations.createOrGet);
 
@@ -29,6 +32,17 @@ export function Sidebar() {
   const isSearching = debouncedSearchTerm.length > 0;
 
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+
+  const syncUser = useMutation(api.users.syncUser);
+
+  useEffect(() => {
+    if (clerkUser) {
+      syncUser({
+        name: clerkUser.fullName || clerkUser.firstName || "Unknown User",
+        imageUrl: clerkUser.imageUrl,
+      }).catch(console.error);
+    }
+  }, [clerkUser, syncUser]);
 
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {

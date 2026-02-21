@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { UserAvatar } from "./user-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Id } from "@convex/_generated/dataModel";
 
 interface UserProps {
   _id: string;
@@ -13,17 +14,17 @@ interface UserProps {
 }
 
 interface ConversationProps {
-  _id: string;
+  _id: Id<"conversations">;
   unreadCount: number;
   isGroup?: boolean;
   groupName?: string;
-  otherUser?: UserProps;
+  otherUser?: UserProps | null;
   lastMessage?: {
-    _id: string;
+    _id: Id<"messages">;
     _creationTime: number;
     content: string;
-    senderId: string;
-  };
+    senderId: Id<"users">;
+  } | null;
 }
 
 function formatPreviewTime(time: number) {

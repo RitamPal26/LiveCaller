@@ -102,3 +102,28 @@ export const heartbeat = mutation({
     }
   },
 });
+
+export const syncUser = mutation({
+  args: {
+    name: v.string(),
+    imageUrl: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return;
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (user) {
+      if (user.name !== args.name || user.imageUrl !== args.imageUrl) {
+        await ctx.db.patch(user._id, {
+          name: args.name,
+          imageUrl: args.imageUrl,
+        });
+      }
+    }
+  },
+});
