@@ -87,7 +87,9 @@ export function MessageBubble({
           </div>
         )}
 
-        <div className="flex flex-col relative">
+        <div
+          className={`flex flex-col relative ${isMe ? "items-end" : "items-start"}`}
+        >
           <div
             className={`rounded-lg px-4 py-2 break-words whitespace-pre-wrap ${
               msg.isDeleted
