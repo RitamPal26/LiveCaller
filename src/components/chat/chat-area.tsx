@@ -12,6 +12,8 @@ import { MessageBubble } from "./message-bubble";
 import { ChatInput } from "./chat-input";
 import { TypingIndicator } from "./typing-indicator";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 export function ChatArea({
   conversationId,
 }: {
@@ -76,7 +78,17 @@ export function ChatArea({
         className="flex-1 overflow-y-auto p-4 space-y-4"
       >
         {messages === undefined ? (
-          <p className="text-center text-slate-400">Loading messages...</p>
+          <div className="flex flex-col space-y-4 mt-auto">
+            <div className="flex w-full justify-start">
+              <Skeleton className="h-10 w-[40%] rounded-lg" />
+            </div>
+            <div className="flex w-full justify-end">
+              <Skeleton className="h-16 w-[60%] rounded-lg" />
+            </div>
+            <div className="flex w-full justify-start">
+              <Skeleton className="h-10 w-[50%] rounded-lg" />
+            </div>
+          </div>
         ) : messages.length === 0 ? (
           <p className="text-center text-slate-400">No messages yet. Say hi!</p>
         ) : (
