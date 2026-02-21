@@ -100,12 +100,10 @@ export function ChatArea({
   };
 
   useEffect(() => {
-    if (messages) {
-      if (isAtBottom) {
-        scrollToBottom();
-      } else {
-        setShowNewMessageButton(true);
-      }
+    if (isAtBottom) {
+      scrollToBottom();
+    } else {
+      setTimeout(() => setShowNewMessageButton(true), 0);
     }
   }, [messages, isAtBottom]);
 
@@ -113,7 +111,7 @@ export function ChatArea({
     if (messages && messages.length > 0) {
       setTimeout(() => scrollToBottom(false), 100);
     }
-  }, [conversationId]);
+  }, [messages, conversationId, markRead]);
 
   useEffect(() => {
     if (messages && messages.length > 0) {

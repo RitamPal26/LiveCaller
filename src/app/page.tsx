@@ -1,8 +1,7 @@
 "use client";
 
 import { Authenticated, Unauthenticated } from "convex/react";
-import { SignInButton, UserButton } from "@clerk/nextjs";
-import { useStoreUser } from "@/hooks/use-store-user";
+import { SignInButton } from "@clerk/nextjs";
 import { AuthenticatedView } from "@/components/auth/authenticated-view";
 
 export default function Home() {

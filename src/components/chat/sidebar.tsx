@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { api } from "@convex/_generated/api";
 import { useDebounce } from "@/hooks/use-debounce";
 import { UserButton, useUser } from "@clerk/nextjs";
+import { Id } from "@convex/_generated/dataModel";
 
 function formatPreviewTime(time: number) {
   const date = new Date(time);
@@ -31,7 +32,7 @@ export function Sidebar() {
 
   const isRootChat = pathname === "/chat";
 
-  const handleStartChat = async (userId: any) => {
+  const handleStartChat = async (userId: Id<"users">) => {
     try {
       const conversationId = await createOrGetConversation({
         participantId: userId,
@@ -45,13 +46,15 @@ export function Sidebar() {
 
   const isSearching = debouncedSearchTerm.length > 0;
 
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 10000);
     return () => clearInterval(interval);
   }, []);
 
-  const checkIsOnline = (user: any) => {
+  const checkIsOnline = (
+    user: { lastSeen?: number; isOnline?: boolean } | null | undefined,
+  ) => {
     if (!user) return false;
     if (user.lastSeen) {
       return now - user.lastSeen < 30000;

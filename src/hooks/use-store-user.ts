@@ -39,6 +39,7 @@ export function useStoreUser() {
     } else if (!isAuthenticated && clerkIdRef.current) {
       markOffline({ clerkId: clerkIdRef.current }).catch(console.error);
       clerkIdRef.current = null;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUserId(null);
     }
   }, [isAuthenticated, storeUser, markOffline, sendHeartbeat]);
