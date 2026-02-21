@@ -9,6 +9,7 @@ export default defineSchema({
     name: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     isOnline: v.boolean(),
+    lastSeen: v.optional(v.number()),
   }).index("by_clerkId", ["clerkId"]),
 
   // 2. Conversations Table

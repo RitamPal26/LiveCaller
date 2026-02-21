@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { useRouter, usePathname } from "next/navigation";
 import { api } from "@convex/_generated/api";
@@ -44,6 +44,20 @@ export function Sidebar() {
   };
 
   const isSearching = debouncedSearchTerm.length > 0;
+
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const checkIsOnline = (user: any) => {
+    if (!user) return false;
+    if (user.lastSeen) {
+      return now - user.lastSeen < 30000;
+    }
+    return user.isOnline;
+  };
 
   return (
     <aside
@@ -102,7 +116,7 @@ export function Sidebar() {
                     </p>
                     <p className="text-xs text-slate-400 truncate">{u.email}</p>
                   </div>
-                  {u.isOnline && (
+                  {checkIsOnline(u) && (
                     <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
                   )}
                 </div>
@@ -150,7 +164,7 @@ export function Sidebar() {
                           {otherUser?.name?.charAt(0) || "U"}
                         </div>
                       )}
-                      {otherUser?.isOnline && (
+                      {checkIsOnline(otherUser) && (
                         <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-slate-900" />
                       )}
                     </div>
