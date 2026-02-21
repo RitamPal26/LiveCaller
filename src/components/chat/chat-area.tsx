@@ -6,11 +6,12 @@ import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ArrowLeft } from "lucide-react";
+import { ChevronDown, ArrowLeft, Trash2 } from "lucide-react";
 
 function formatTime(creationTime: number) {
   const date = new Date(creationTime);
   const now = new Date();
+
   if (date.toDateString() === now.toDateString()) {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   } else if (date.getFullYear() === now.getFullYear()) {
@@ -50,6 +51,8 @@ export function ChatArea({
   const setTyping = useMutation(api.typing.set);
 
   const lastPingRef = useRef(0);
+
+  const deleteMessage = useMutation(api.messages.softDelete);
 
   const handleScroll = () => {
     if (!scrollContainerRef.current) return;
@@ -146,25 +149,48 @@ export function ChatArea({
         ) : (
           messages.map((msg) => {
             const isMe = msg.sender?.clerkId === user?.id;
+
             return (
               <div
                 key={msg._id}
-                className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
+                className={`flex flex-col w-full ${isMe ? "items-end" : "items-start"} mb-4`}
               >
+                {/* 1. Sender Name (for other people) */}
                 {!isMe && (
                   <span className="text-xs text-slate-400 mb-1 ml-1">
                     {msg.sender?.name || "Unknown"}
                   </span>
                 )}
-                <div
-                  className={`rounded-lg px-4 py-2 max-w-[70%] break-words whitespace-pre-wrap ${
-                    isMe
-                      ? "bg-blue-600 text-white"
-                      : "bg-slate-800 text-slate-200"
-                  }`}
-                >
-                  {msg.content}
+
+                {/* 2. Message Bubble & Delete Button Container */}
+                {/* FIX: Changed to a flex row so the button sits naturally beside the bubble inside the hover group */}
+                <div className="flex items-center group max-w-[70%]">
+                  {/* The Delete Button (Now sits to the left of the message) */}
+                  {isMe && !msg.isDeleted && (
+                    <button
+                      onClick={() => deleteMessage({ messageId: msg._id })}
+                      className="hidden group-hover:flex items-center justify-center p-2 mr-1 text-slate-500 hover:text-red-500 transition-colors shrink-0"
+                      title="Delete Message"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+
+                  {/* The Message Bubble */}
+                  <div
+                    className={`rounded-lg px-4 py-2 break-words whitespace-pre-wrap ${
+                      msg.isDeleted
+                        ? "bg-transparent border border-slate-700 text-slate-500 italic" // Deleted style
+                        : isMe
+                          ? "bg-blue-600 text-white"
+                          : "bg-slate-800 text-slate-200" // Normal style
+                    }`}
+                  >
+                    {msg.isDeleted ? "This message was deleted" : msg.content}
+                  </div>
                 </div>
+
+                {/* 3. Timestamp */}
                 <span className="text-[10px] text-slate-500 mt-1 mx-1">
                   {formatTime(msg._creationTime)}
                 </span>

@@ -14,9 +14,10 @@ export default defineSchema({
 
   // 2. Conversations Table
   conversations: defineTable({
-    isGroup: v.boolean(),
     name: v.optional(v.string()),
     participantIds: v.array(v.id("users")),
+    isGroup: v.optional(v.boolean()),
+    groupName: v.optional(v.string()),
   }),
 
   // 3. Messages Table
@@ -25,6 +26,14 @@ export default defineSchema({
     senderId: v.id("users"),
     content: v.string(),
     isDeleted: v.optional(v.boolean()),
+    reactions: v.optional(
+      v.array(
+        v.object({
+          emoji: v.string(),
+          userId: v.id("users"),
+        }),
+      ),
+    ),
   }).index("by_conversationId", ["conversationId"]),
 
   // 4. Read Receipts Table
