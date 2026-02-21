@@ -77,3 +77,42 @@ export const softDelete = mutation({
     });
   },
 });
+
+export const toggleReaction = mutation({
+  args: {
+    messageId: v.id("messages"),
+    emoji: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) throw new Error("User not found");
+
+    const message = await ctx.db.get(args.messageId);
+    if (!message) throw new Error("Message not found");
+
+    const currentReactions = message.reactions || [];
+
+    const existingIndex = currentReactions.findIndex(
+      (r) => r.emoji === args.emoji && r.userId === user._id,
+    );
+
+    let newReactions;
+    if (existingIndex !== -1) {
+      newReactions = [...currentReactions];
+      newReactions.splice(existingIndex, 1);
+    } else {
+      newReactions = [
+        ...currentReactions,
+        { emoji: args.emoji, userId: user._id },
+      ];
+    }
+
+    await ctx.db.patch(args.messageId, { reactions: newReactions });
+  },
+});
