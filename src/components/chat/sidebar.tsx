@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { api } from "@convex/_generated/api";
 import { useDebounce } from "@/hooks/use-debounce";
 import { UserButton, useUser } from "@clerk/nextjs";
@@ -18,6 +18,7 @@ function formatPreviewTime(time: number) {
 
 export function Sidebar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user: clerkUser } = useUser();
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -27,6 +28,8 @@ export function Sidebar() {
   });
   const activeConversations = useQuery(api.conversations.listActive);
   const createOrGetConversation = useMutation(api.conversations.createOrGet);
+
+  const isRootChat = pathname === "/chat";
 
   const handleStartChat = async (userId: any) => {
     try {
@@ -43,7 +46,11 @@ export function Sidebar() {
   const isSearching = debouncedSearchTerm.length > 0;
 
   return (
-    <aside className="hidden md:flex w-80 flex-col border-r border-slate-800 bg-slate-900 h-full">
+    <aside
+      className={`flex-col border-r border-slate-800 bg-slate-900 h-full ${
+        isRootChat ? "flex w-full md:w-80" : "hidden md:flex md:w-80"
+      }`}
+    >
       <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
         <h2 className="text-lg font-bold tracking-tight text-white">
           Messages

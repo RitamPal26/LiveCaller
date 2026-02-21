@@ -5,7 +5,8 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
-import { ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ChevronDown, ArrowLeft } from "lucide-react";
 
 function formatTime(creationTime: number) {
   const date = new Date(creationTime);
@@ -34,6 +35,7 @@ export function ChatArea({
 }) {
   const { user } = useUser();
   const [newMessage, setNewMessage] = useState("");
+  const router = useRouter();
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -91,7 +93,15 @@ export function ChatArea({
 
   return (
     <div className="flex h-full flex-col bg-slate-950 relative">
-      <div className="flex h-16 items-center border-b border-slate-800 px-4">
+      <div className="flex h-16 items-center border-b border-slate-800 px-4 gap-3">
+        {/* Only shows on mobile */}
+        <button
+          onClick={() => router.push("/chat")}
+          className="md:hidden rounded-full p-2 hover:bg-slate-800 transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5 text-white" />
+        </button>
+
         <h2 className="text-lg font-bold text-white">Chat</h2>
       </div>
 

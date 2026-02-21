@@ -3,12 +3,15 @@
 import { ReactNode } from "react";
 import { Sidebar } from "@/components/chat/sidebar";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation"; // Added usePathname
 import { useStoreUser } from "@/hooks/use-store-user";
 
 export default function ChatLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   useStoreUser();
+
+  const isRootChat = pathname === "/chat";
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-950 text-white">
@@ -20,7 +23,11 @@ export default function ChatLayout({ children }: { children: ReactNode }) {
 
       <Authenticated>
         <Sidebar />
-        <main className="flex-1 flex flex-col bg-slate-950">{children}</main>
+        <main
+          className={`flex-1 flex-col bg-slate-950 ${isRootChat ? "hidden md:flex" : "flex"}`}
+        >
+          {children}
+        </main>
       </Authenticated>
 
       <Unauthenticated>
