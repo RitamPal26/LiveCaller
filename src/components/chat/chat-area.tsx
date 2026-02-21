@@ -31,6 +31,10 @@ export function ChatArea({
   const activeTypists = useQuery(api.typing.getActive, { conversationId });
   const markRead = useMutation(api.readReceipts.markRead);
 
+  const currentConversation = useQuery(api.conversations.getConversation, {
+    conversationId,
+  });
+
   const handleScroll = () => {
     if (!scrollContainerRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } =
@@ -62,14 +66,18 @@ export function ChatArea({
 
   return (
     <div className="flex h-full flex-col bg-slate-950 relative">
-      <div className="flex h-16 items-center border-b border-slate-800 px-4 gap-3">
+      <div className="flex h-16 items-center border-b border-slate-800 px-4 gap-3 shadow-sm z-10">
         <button
           onClick={() => router.push("/chat")}
           className="md:hidden rounded-full p-2 hover:bg-slate-800 transition-colors"
         >
           <ArrowLeft className="h-5 w-5 text-white" />
         </button>
-        <h2 className="text-lg font-bold text-white">Chat</h2>
+        <h2 className="text-lg font-bold text-white">
+          {currentConversation?.isGroup
+            ? currentConversation.groupName
+            : "Chat"}
+        </h2>
       </div>
 
       <div
@@ -90,7 +98,9 @@ export function ChatArea({
             </div>
           </div>
         ) : messages.length === 0 ? (
-          <p className="text-center text-slate-400">No messages yet. Say hi!</p>
+          <p className="text-center text-slate-400">
+            No messages yet. Say Hi!!
+          </p>
         ) : (
           messages.map((msg) => (
             <MessageBubble

@@ -15,6 +15,8 @@ interface UserProps {
 interface ConversationProps {
   _id: string;
   unreadCount: number;
+  isGroup?: boolean;
+  groupName?: string;
   otherUser?: UserProps;
   lastMessage?: {
     _id: string;
@@ -72,6 +74,12 @@ export function ConversationList({
         const otherUser = conv.otherUser;
         const lastMessage = conv.lastMessage;
 
+        const displayName = conv.isGroup
+          ? conv.groupName
+          : otherUser?.name || "Unknown User";
+        const displayImage = conv.isGroup ? undefined : otherUser?.imageUrl;
+        const isOnline = conv.isGroup ? false : checkIsOnline(otherUser);
+
         return (
           <div
             key={conv._id}
@@ -79,15 +87,15 @@ export function ConversationList({
             onClick={() => router.push(`/chat/${conv._id}`)}
           >
             <UserAvatar
-              imageUrl={otherUser?.imageUrl}
-              name={otherUser?.name}
-              isOnline={checkIsOnline(otherUser)}
+              imageUrl={displayImage}
+              name={displayName}
+              isOnline={isOnline}
             />
 
             <div className="flex-1 min-w-0 flex flex-col justify-center">
               <div className="flex justify-between items-baseline mb-0.5">
                 <p className="text-sm font-medium text-white truncate">
-                  {otherUser?.name || "Unknown User"}
+                  {displayName}
                 </p>
                 {lastMessage && (
                   <p className="text-xs text-slate-500 whitespace-nowrap ml-2">

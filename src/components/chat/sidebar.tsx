@@ -7,9 +7,11 @@ import { api } from "@convex/_generated/api";
 import { useDebounce } from "@/hooks/use-debounce";
 import { UserButton } from "@clerk/nextjs";
 import { Id } from "@convex/_generated/dataModel";
+import { Users } from "lucide-react";
 
 import { ConversationList } from "./conversation-list";
 import { UserAvatar } from "./user-avatar";
+import { CreateGroupModal } from "./create-group-modal";
 
 export function Sidebar() {
   const router = useRouter();
@@ -25,6 +27,8 @@ export function Sidebar() {
 
   const isRootChat = pathname === "/chat";
   const isSearching = debouncedSearchTerm.length > 0;
+
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
 
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -60,7 +64,16 @@ export function Sidebar() {
         <h2 className="text-lg font-bold tracking-tight text-white">
           Messages
         </h2>
-        <UserButton afterSignOutUrl="/" />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsGroupModalOpen(true)}
+            className="p-1.5 text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-full transition-colors"
+            title="Create Group"
+          >
+            <Users className="h-4 w-4" />
+          </button>
+          <UserButton afterSignOutUrl="/" />
+        </div>
       </div>
 
       <div className="p-4 border-b border-slate-800">
@@ -113,6 +126,15 @@ export function Sidebar() {
           />
         )}
       </div>
+      {isGroupModalOpen && (
+        <CreateGroupModal
+          onClose={() => setIsGroupModalOpen(false)}
+          onCreated={(convId) => {
+            setIsGroupModalOpen(false);
+            router.push(`/chat/${convId}`);
+          }}
+        />
+      )}
     </aside>
   );
 }

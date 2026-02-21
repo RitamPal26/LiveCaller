@@ -109,3 +109,47 @@ export const listActive = query({
     return enrichedConversations.sort((a, b) => b.updatedAt - a.updatedAt);
   },
 });
+
+export const createGroup = mutation({
+  args: {
+    participantIds: v.array(v.id("users")),
+    name: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) throw new Error("User not found");
+
+    const allParticipants = [...new Set([...args.participantIds, user._id])];
+
+    if (allParticipants.length < 3) {
+      throw new Error("Group must have at least 3 members (including you).");
+    }
+
+    const conversationId = await ctx.db.insert("conversations", {
+      participantIds: allParticipants,
+      isGroup: true,
+      groupName: args.name,
+    });
+
+    return conversationId;
+  },
+});
+
+export const getConversation = query({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const conv = await ctx.db.get(args.conversationId);
+    if (!conv) return null;
+
+    return conv;
+  },
+});

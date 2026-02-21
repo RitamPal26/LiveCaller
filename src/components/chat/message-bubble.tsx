@@ -26,6 +26,15 @@ function formatTime(creationTime: number) {
 
 const ALLOWED_EMOJIS = ["👍", "❤️", "😂", "😮", "😢"];
 
+interface MessageProps {
+  _id: string;
+  _creationTime: number;
+  content: string;
+  isDeleted?: boolean;
+  sender?: { clerkId?: string; name?: string };
+  reactions?: Array<{ emoji: string; userId: string }>;
+}
+
 export function MessageBubble({
   msg,
   isMe,
