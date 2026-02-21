@@ -29,6 +29,11 @@ export const send = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Unauthorized");
 
+    const trimmedContent = args.content.trim();
+    if (trimmedContent.length === 0 || trimmedContent.length > 1000) {
+      throw new Error("Message must be between 1 and 1000 characters.");
+    }
+
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))

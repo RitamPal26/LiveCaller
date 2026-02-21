@@ -79,7 +79,9 @@ export function ChatArea({
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    const trimmed = newMessage.trim();
+
+    if (!trimmed || trimmed.length > 1000) return;
 
     try {
       await sendMessage({ conversationId, content: newMessage.trim() });
@@ -199,6 +201,7 @@ export function ChatArea({
             type="text"
             value={newMessage}
             onChange={handleTyping}
+            maxLength={1000}
             placeholder="Type a message..."
             className="flex-1 rounded-full bg-slate-900 px-4 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-slate-800"
           />
