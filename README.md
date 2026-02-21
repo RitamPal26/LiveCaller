@@ -21,3 +21,54 @@ A modern, full-stack real-time messaging application built with Next.js, Convex,
 * **Backend & Database:** Convex
 * **Authentication:** Clerk
 * **Deployment:** Vercel
+
+## Architectural Diagram
+
+```mermaid
+graph TD
+    %% --- STYLING ---
+    classDef client fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1;
+    classDef frontend fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20;
+    classDef backend fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#bf360c;
+    classDef auth fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px,color:#4a148c;
+
+    %% --- NODES ---
+    subgraph Client_Device ["Client Device"]
+        Browser["User Browser"]:::client
+    end
+
+    subgraph Vercel_Hosting ["Vercel (Hosting)"]
+        NextJS["Next.js"]:::frontend
+    end
+
+    subgraph Auth_Service ["Authentication Service"]
+        Clerk["Clerk"]:::auth
+    end
+
+    subgraph Convex_BaaS ["Convex"]
+        direction TB
+        ConvexEngine["Convex Engine"]:::backend
+        ConvexDB[("Database")]:::backend
+        ConvexEngine <--> ConvexDB
+    end
+
+    %% --- DATA FLOWS ---
+
+    %% 1. Initial Load & Auth
+    Browser -- "1. Requests App" --> NextJS
+    NextJS -- "2. Checks Session" --> Clerk
+    Clerk -- "3. Returns Secure Token" --> NextJS
+    NextJS -- "4. Serves UI + Token" --> Browser
+
+    %% 2. Server-to-Backend Connection (New)
+    NextJS -. "5. Configures Client & Optional SSR" .-> ConvexEngine
+
+    %% 3. Real-time Connection established from Client browser
+    Browser == "6. Establishes Secure WebSocket Connection" ==> ConvexEngine
+
+    %% 4. User Actions (Mutations)
+    Browser -- "7. Actions (Mutations)" --> ConvexEngine
+
+    %% 5. Real-time Updates (Subscriptions)
+    ConvexEngine -- "8. Pushes Real-time Data Updates" --> Browser
+```
