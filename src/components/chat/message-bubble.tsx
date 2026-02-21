@@ -31,7 +31,7 @@ interface MessageProps {
   _creationTime: number;
   content: string;
   isDeleted?: boolean;
-  sender?: { clerkId?: string; name?: string };
+  sender?: { clerkId?: string; name?: string } | null;
   reactions?: Array<{ emoji: string; userId: string }>;
 }
 
