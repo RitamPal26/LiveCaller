@@ -74,10 +74,33 @@ export const listActive = query({
           .order("desc")
           .first();
 
+        const receipt = await ctx.db
+          .query("readReceipts")
+          .withIndex("by_user_and_conversation", (q) =>
+            q.eq("userId", currentUser._id).eq("conversationId", conv._id),
+          )
+          .first();
+
+        const lastReadTime = receipt ? receipt.lastReadTime : 0;
+
+        const unreadMessages = await ctx.db
+          .query("messages")
+          .withIndex("by_conversationId", (q) =>
+            q.eq("conversationId", conv._id),
+          )
+          .filter((q) =>
+            q.and(
+              q.gt(q.field("_creationTime"), lastReadTime),
+              q.neq(q.field("senderId"), currentUser._id),
+            ),
+          )
+          .collect();
+
         return {
           _id: conv._id,
           otherUser,
           lastMessage,
+          unreadCount: unreadMessages.length,
           updatedAt: lastMessage?._creationTime || conv._creationTime,
         };
       }),

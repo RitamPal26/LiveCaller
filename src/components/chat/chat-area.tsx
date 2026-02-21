@@ -44,6 +44,7 @@ export function ChatArea({
 
   const messages = useQuery(api.messages.list, { conversationId });
   const sendMessage = useMutation(api.messages.send);
+  const markRead = useMutation(api.readReceipts.markRead);
 
   const handleScroll = () => {
     if (!scrollContainerRef.current) return;
@@ -77,6 +78,12 @@ export function ChatArea({
       setTimeout(() => scrollToBottom(false), 100);
     }
   }, [conversationId]);
+
+  useEffect(() => {
+    if (messages && messages.length > 0) {
+      markRead({ conversationId }).catch(console.error);
+    }
+  }, [messages, conversationId, markRead]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();

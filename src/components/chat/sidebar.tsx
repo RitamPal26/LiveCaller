@@ -166,18 +166,29 @@ export function Sidebar() {
                           </p>
                         )}
                       </div>
-                      <p className="text-sm text-slate-400 truncate">
-                        {lastMessage ? (
-                          <>
-                            {lastMessage.senderId !== otherUser?._id && (
-                              <span className="text-slate-500 mr-1">You:</span>
-                            )}
-                            {lastMessage.content}
-                          </>
-                        ) : (
-                          <span className="italic">No messages yet</span>
+
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm text-slate-400 truncate pr-2">
+                          {lastMessage ? (
+                            <>
+                              {lastMessage.senderId !== otherUser?._id && (
+                                <span className="text-slate-500 mr-1">
+                                  You:
+                                </span>
+                              )}
+                              {lastMessage.content}
+                            </>
+                          ) : (
+                            <span className="italic">No messages yet</span>
+                          )}
+                        </p>
+
+                        {conv.unreadCount > 0 && (
+                          <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
+                            {conv.unreadCount > 99 ? "99+" : conv.unreadCount}
+                          </div>
                         )}
-                      </p>
+                      </div>
                     </div>
                   </div>
                 );

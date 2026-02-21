@@ -25,4 +25,11 @@ export default defineSchema({
     content: v.string(),
     isDeleted: v.optional(v.boolean()),
   }).index("by_conversationId", ["conversationId"]),
+
+  // 4. Read Receipts Table
+  readReceipts: defineTable({
+    userId: v.id("users"),
+    conversationId: v.id("conversations"),
+    lastReadTime: v.number(), // A timestamp of when they last opened this chat
+  }).index("by_user_and_conversation", ["userId", "conversationId"]),
 });
