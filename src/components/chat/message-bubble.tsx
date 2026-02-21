@@ -2,10 +2,8 @@
 
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Id } from "@convex/_generated/dataModel";
 import { Trash2 } from "lucide-react";
 
-// Move your formatTime function here or to a shared lib folder
 function formatTime(creationTime: number) {
   const date = new Date(creationTime);
   const now = new Date();
@@ -33,7 +31,7 @@ export function MessageBubble({
   isMe,
   currentUserId,
 }: {
-  msg: any;
+  msg: MessageProps;
   isMe: boolean;
   currentUserId?: string;
 }) {
@@ -43,7 +41,7 @@ export function MessageBubble({
   const reactionCounts: Record<string, number> = {};
   const myReactions = new Set<string>();
 
-  msg.reactions?.forEach((r: any) => {
+  msg.reactions?.forEach((r) => {
     reactionCounts[r.emoji] = (reactionCounts[r.emoji] || 0) + 1;
     if (r.userId === currentUserId) myReactions.add(r.emoji);
   });

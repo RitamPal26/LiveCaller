@@ -1,0 +1,116 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { UserAvatar } from "./user-avatar";
+
+interface UserProps {
+  _id: string;
+  name?: string;
+  imageUrl?: string;
+  lastSeen?: number;
+  isOnline?: boolean;
+}
+
+interface ConversationProps {
+  _id: string;
+  unreadCount: number;
+  otherUser?: UserProps;
+  lastMessage?: {
+    _id: string;
+    _creationTime: number;
+    content: string;
+    senderId: string;
+  };
+}
+
+function formatPreviewTime(time: number) {
+  const date = new Date(time);
+  const now = new Date();
+  if (date.toDateString() === now.toDateString()) {
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+  return date.toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
+export function ConversationList({
+  conversations,
+  checkIsOnline,
+}: {
+  conversations: ConversationProps[] | undefined;
+  checkIsOnline: (user: UserProps | null | undefined) => boolean;
+}) {
+  const router = useRouter();
+
+  if (conversations === undefined) {
+    return (
+      <p className="text-sm text-slate-400 text-center mt-4 animate-pulse">
+        Loading chats...
+      </p>
+    );
+  }
+
+  if (conversations.length === 0) {
+    return (
+      <p className="text-sm text-slate-400 text-center mt-4">
+        No active chats. Search for a user above!
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-1">
+      {conversations.map((conv) => {
+        const otherUser = conv.otherUser;
+        const lastMessage = conv.lastMessage;
+
+        return (
+          <div
+            key={conv._id}
+            className="flex items-center space-x-3 rounded-lg p-2 transition-colors hover:bg-slate-800 cursor-pointer"
+            onClick={() => router.push(`/chat/${conv._id}`)}
+          >
+            <UserAvatar
+              imageUrl={otherUser?.imageUrl}
+              name={otherUser?.name}
+              isOnline={checkIsOnline(otherUser)}
+            />
+
+            <div className="flex-1 min-w-0 flex flex-col justify-center">
+              <div className="flex justify-between items-baseline mb-0.5">
+                <p className="text-sm font-medium text-white truncate">
+                  {otherUser?.name || "Unknown User"}
+                </p>
+                {lastMessage && (
+                  <p className="text-xs text-slate-500 whitespace-nowrap ml-2">
+                    {formatPreviewTime(lastMessage._creationTime)}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-between items-center">
+                <p className="text-sm text-slate-400 truncate pr-2">
+                  {lastMessage ? (
+                    <>
+                      {lastMessage.senderId !== otherUser?._id && (
+                        <span className="text-slate-500 mr-1">You:</span>
+                      )}
+                      {lastMessage.content}
+                    </>
+                  ) : (
+                    <span className="italic">No messages yet</span>
+                  )}
+                </p>
+
+                {conv.unreadCount > 0 && (
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm">
+                    {conv.unreadCount > 99 ? "99+" : conv.unreadCount}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}

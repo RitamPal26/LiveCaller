@@ -46,6 +46,7 @@ export function ChatArea({
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isAtBottom) scrollToBottom();
     else setTimeout(() => setShowNewMessageButton(true), 0);
   }, [messages, isAtBottom]);
