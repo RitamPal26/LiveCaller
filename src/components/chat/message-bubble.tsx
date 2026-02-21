@@ -3,6 +3,7 @@
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Trash2 } from "lucide-react";
+import { Id } from "@convex/_generated/dataModel";
 
 function formatTime(creationTime: number) {
   const date = new Date(creationTime);
@@ -27,7 +28,7 @@ function formatTime(creationTime: number) {
 const ALLOWED_EMOJIS = ["👍", "❤️", "😂", "😮", "😢"];
 
 interface MessageProps {
-  _id: string;
+  _id: Id<"messages">;
   _creationTime: number;
   content: string;
   isDeleted?: boolean;
