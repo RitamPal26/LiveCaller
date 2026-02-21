@@ -157,7 +157,11 @@ export function ChatArea({
                   </span>
                 )}
                 <div
-                  className={`max-w-[70%] rounded-2xl px-4 py-2 text-white shadow-sm ${isMe ? "bg-blue-600 rounded-br-none" : "bg-slate-800 rounded-bl-none"}`}
+                  className={`rounded-lg px-4 py-2 max-w-[70%] break-words whitespace-pre-wrap ${
+                    isMe
+                      ? "bg-blue-600 text-white"
+                      : "bg-slate-800 text-slate-200"
+                  }`}
                 >
                   {msg.content}
                 </div>
