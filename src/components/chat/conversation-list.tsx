@@ -13,6 +13,7 @@ interface UserProps {
   isOnline?: boolean;
 }
 
+// Around line 14:
 interface ConversationProps {
   _id: Id<"conversations">;
   unreadCount: number;
@@ -24,6 +25,8 @@ interface ConversationProps {
     _creationTime: number;
     content: string;
     senderId: Id<"users">;
+    senderName?: string;
+    isMe?: boolean;
   } | null;
 }
 
@@ -109,9 +112,14 @@ export function ConversationList({
                 <p className="text-sm text-slate-400 truncate pr-2">
                   {lastMessage ? (
                     <>
-                      {lastMessage.senderId !== otherUser?._id && (
+                      {lastMessage.isMe ? (
                         <span className="text-slate-500 mr-1">You:</span>
-                      )}
+                      ) : conv.isGroup ? (
+                        <span className="text-slate-500 mr-1">
+                          {lastMessage.senderName}:
+                        </span>
+                      ) : null}
+
                       {lastMessage.content}
                     </>
                   ) : (

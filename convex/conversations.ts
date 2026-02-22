@@ -74,6 +74,10 @@ export const listActive = query({
           .order("desc")
           .first();
 
+        const lastMessageSender = lastMessage
+          ? await ctx.db.get(lastMessage.senderId)
+          : null;
+
         const receipt = await ctx.db
           .query("readReceipts")
           .withIndex("by_user_and_conversation", (q) =>
@@ -106,7 +110,13 @@ export const listActive = query({
           isGroup: conv.isGroup,
           groupName: conv.groupName,
           otherUser: otherUser,
-          lastMessage: lastMessage,
+          lastMessage: lastMessage
+            ? {
+                ...lastMessage,
+                senderName: lastMessageSender?.name?.split(" ")[0] || "Someone",
+                isMe: lastMessage.senderId === currentUser._id,
+              }
+            : null,
           unreadCount: unreadCount,
           updatedAt: updatedAt,
         };
