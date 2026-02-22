@@ -29,7 +29,12 @@ export function ChatArea({
 
   const messages = useQuery(api.messages.list, { conversationId });
 
+  const currentConversation = useQuery(api.conversations.getConversation, {
+    conversationId,
+  });
+
   const isAiThinking =
+    currentConversation?.isGroup &&
     messages &&
     messages.length > 0 &&
     messages[messages.length - 1].content.includes("@AI") &&
@@ -37,10 +42,6 @@ export function ChatArea({
 
   const activeTypists = useQuery(api.typing.getActive, { conversationId });
   const markRead = useMutation(api.readReceipts.markRead);
-
-  const currentConversation = useQuery(api.conversations.getConversation, {
-    conversationId,
-  });
 
   const handleScroll = () => {
     if (!scrollContainerRef.current) return;
