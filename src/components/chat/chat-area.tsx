@@ -12,7 +12,9 @@ import { MessageBubble } from "./message-bubble";
 import { ChatInput } from "./chat-input";
 import { TypingIndicator } from "./typing-indicator";
 import { UserAvatar } from "./user-avatar";
+
 import { Skeleton } from "@/components/ui/skeleton";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function ChatArea({
   conversationId,
@@ -122,43 +124,45 @@ export function ChatArea({
         )}
       </div>
 
-      <div
-        ref={scrollContainerRef}
+      <ScrollArea
+        className="flex-1 overflow-hidden"
+        viewportRef={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 overflow-y-auto p-4 space-y-4"
       >
-        {messages === undefined ? (
-          <div className="flex flex-col space-y-4 mt-auto">
-            <div className="flex w-full justify-start">
-              <Skeleton className="h-10 w-[40%] rounded-lg" />
+        <div className="p-4 space-y-4">
+          {messages === undefined ? (
+            <div className="flex flex-col space-y-4 mt-auto">
+              <div className="flex w-full justify-start">
+                <Skeleton className="h-10 w-[40%] rounded-lg" />
+              </div>
+              <div className="flex w-full justify-end">
+                <Skeleton className="h-16 w-[60%] rounded-lg" />
+              </div>
+              <div className="flex w-full justify-start">
+                <Skeleton className="h-10 w-[50%] rounded-lg" />
+              </div>
             </div>
-            <div className="flex w-full justify-end">
-              <Skeleton className="h-16 w-[60%] rounded-lg" />
-            </div>
-            <div className="flex w-full justify-start">
-              <Skeleton className="h-10 w-[50%] rounded-lg" />
-            </div>
-          </div>
-        ) : messages.length === 0 ? (
-          <p className="text-center text-white-600 dark:text-sky-400">
-            No messages yet. Say Hi!!
-          </p>
-        ) : (
-          <>
-            {messages.map((msg) => (
-              <MessageBubble
-                key={msg._id}
-                msg={msg}
-                isMe={msg.sender?.clerkId === user?.id}
-                currentUserId={user?.id}
-              />
-            ))}
+          ) : messages.length === 0 ? (
+            <p className="text-center text-white-600 dark:text-sky-400">
+              No messages yet. Say Hi!!
+            </p>
+          ) : (
+            <>
+              {messages.map((msg) => (
+                <MessageBubble
+                  key={msg._id}
+                  msg={msg}
+                  isMe={msg.sender?.clerkId === user?.id}
+                  currentUserId={user?.id}
+                />
+              ))}
 
-            {isAiThinking && <TypingIndicator activeTypists={["AI Agent"]} />}
-          </>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+              {isAiThinking && <TypingIndicator activeTypists={["AI Agent"]} />}
+            </>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+      </ScrollArea>
 
       {showNewMessageButton && (
         <button
