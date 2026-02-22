@@ -96,12 +96,19 @@ export const listActive = query({
           )
           .collect();
 
+        const unreadCount = unreadMessages.length;
+        const updatedAt = lastMessage
+          ? lastMessage._creationTime
+          : conv._creationTime;
+
         return {
           _id: conv._id,
-          otherUser,
-          lastMessage,
-          unreadCount: unreadMessages.length,
-          updatedAt: lastMessage?._creationTime || conv._creationTime,
+          isGroup: conv.isGroup,
+          groupName: conv.groupName,
+          otherUser: otherUser,
+          lastMessage: lastMessage,
+          unreadCount: unreadCount,
+          updatedAt: updatedAt,
         };
       }),
     );
