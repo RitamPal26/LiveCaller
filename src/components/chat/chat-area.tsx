@@ -139,7 +139,7 @@ export function ChatArea({
             </div>
           </div>
         ) : messages.length === 0 ? (
-          <p className="text-center text-slate-400">
+          <p className="text-center text-white-600 dark:text-sky-400">
             No messages yet. Say Hi!!
           </p>
         ) : (

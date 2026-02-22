@@ -32,7 +32,7 @@ export const handleCommand = action({
           messages: [
             {
               role: "system",
-              content: `You are a highly efficient AI assistant participating in a group chat. 
+              content: `You are a summarizer assistant participating in a group chat. Your main job is to summarize the past conversation as said by different users. 
             
             Follow these strict rules:
             1. Keep all responses precise, crisp, and strictly under 60 words.
