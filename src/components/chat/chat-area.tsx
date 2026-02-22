@@ -28,6 +28,13 @@ export function ChatArea({
   const [showNewMessageButton, setShowNewMessageButton] = useState(false);
 
   const messages = useQuery(api.messages.list, { conversationId });
+
+  const isAiThinking =
+    messages &&
+    messages.length > 0 &&
+    messages[messages.length - 1].content.includes("@AI") &&
+    messages[messages.length - 1].sender?.clerkId !== "system_ai";
+
   const activeTypists = useQuery(api.typing.getActive, { conversationId });
   const markRead = useMutation(api.readReceipts.markRead);
 
@@ -136,14 +143,18 @@ export function ChatArea({
             No messages yet. Say Hi!!
           </p>
         ) : (
-          messages.map((msg) => (
-            <MessageBubble
-              key={msg._id}
-              msg={msg}
-              isMe={msg.sender?.clerkId === user?.id}
-              currentUserId={user?.id}
-            />
-          ))
+          <>
+            {messages.map((msg) => (
+              <MessageBubble
+                key={msg._id}
+                msg={msg}
+                isMe={msg.sender?.clerkId === user?.id}
+                currentUserId={user?.id}
+              />
+            ))}
+
+            {isAiThinking && <TypingIndicator />}
+          </>
         )}
         <div ref={messagesEndRef} />
       </div>

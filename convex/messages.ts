@@ -1,5 +1,11 @@
-import { query, mutation } from "./_generated/server";
+import {
+  query,
+  mutation,
+  internalMutation,
+  internalQuery,
+} from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 
 // Fetch all messages for a specific conversation
 export const list = query({
@@ -48,6 +54,12 @@ export const send = mutation({
       senderId: user._id,
       content: args.content,
     });
+    if (args.content.includes("@AI")) {
+      await ctx.scheduler.runAfter(0, api.ai.handleCommand, {
+        conversationId: args.conversationId,
+        command: args.content,
+      });
+    }
   },
 });
 
@@ -116,5 +128,64 @@ export const toggleReaction = mutation({
     }
 
     await ctx.db.patch(args.messageId, { reactions: newReactions });
+  },
+});
+
+// Internal query to fetch messages for AI context
+export const getHistoryForAi = internalQuery({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, args) => {
+    const conversation = await ctx.db.get(args.conversationId);
+
+    if (!conversation || !conversation.isGroup) {
+      throw new Error(
+        "Privacy Lock: AI Agent is only allowed to read Group Chats.",
+      );
+    }
+
+    const messages = await ctx.db
+      .query("messages")
+      .withIndex("by_conversationId", (q) =>
+        q.eq("conversationId", args.conversationId),
+      )
+      .order("desc")
+      .take(20);
+
+    return messages.reverse().map((msg) => ({
+      content: msg.content,
+      isAi: false,
+    }));
+  },
+});
+
+// Internal mutation to save AI-generated messages
+export const sendAiMessage = internalMutation({
+  args: {
+    conversationId: v.id("conversations"),
+    content: v.string(),
+  },
+  handler: async (ctx, args) => {
+    let aiUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", "system_ai"))
+      .unique();
+
+    if (!aiUser) {
+      const newAiId = await ctx.db.insert("users", {
+        clerkId: "system_ai",
+        name: "AI Agent",
+        email: "ai@system.local",
+        imageUrl:
+          "https://upload.wikimedia.org/wikipedia/commons/0/04/ChatGPT_logo.svg",
+        isOnline: true,
+      });
+      aiUser = await ctx.db.get(newAiId);
+    }
+
+    await ctx.db.insert("messages", {
+      conversationId: args.conversationId,
+      content: args.content,
+      senderId: aiUser!._id,
+    });
   },
 });
