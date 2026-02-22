@@ -1,26 +1,31 @@
 # LiveCaller
 
-A modern, full-stack real-time messaging application built with Next.js, Convex, and Clerk. LiveCaller provides instant 1-on-1 communication with a native-app feel, featuring typing indicators, read receipts, and a robust presence system.
+A modern, full-stack real-time messaging application built with Next.js, Convex, and Clerk. LiveCaller provides instant 1-on-1 communication with a native-app feel.
 
 **Live Demo:** [https://live-caller.vercel.app](https://live-caller.vercel.app)
 
-## Key Features
 
-* **Real-Time WebSockets:** Instant, bidirectional message delivery powered by Convex.
-* **Robust Presence System:** A custom "Heartbeat" architecture to accurately track online/offline status, even handling abrupt browser exits.
-* **Typing Indicators:** Real-time animated typing states with debounced backend updates for optimized performance.
-* **Read Receipts & Unread Badges:** Automatically tracks when users view conversations and displays accurate unread message counts.
-* **Smart Auto-Scroll:** Automatically snaps to new messages, with a floating "New Messages" alert if the user is reading chat history.
-* **Global Search:** Debounced user discovery system for starting new conversations.
-* **Fully Responsive:** Fluid UI built with Tailwind CSS, seamlessly adapting from split-screen desktop views to full-screen mobile routing.
-* **Secure Authentication:** Complete user management and session protection via Clerk.
+### Key Features
+
+* **Secure, Real-Time Foundation:** Complete user authentication and session protection via Clerk, paired with instant, bidirectional message delivery powered by Convex WebSockets.
+
+* **Privacy-First AI Agent:** A context-aware AI for group chat summaries and Q&A, secured by strict routing gates that completely isolate the bot from user directories and private 1-on-1 messages.
+
+* **Live Presence & Awareness:** A custom "Heartbeat" architecture for accurate online/offline tracking, combined with unified typing indicators.
+
+* **Rich Message Interactions:** A dynamic chat experience featuring real-time emoji reactions and deletion feature(in case you send something stupid !!).
+
+* **Smart & Responsive UX:** A fluid Tailwind UI that flawlessly adapts from split-screen desktop to mobile routing, featuring intelligent auto-scrolling with floating "New Messages" alerts to protect the user's reading position.
+
 
 ## Tech Stack
 
 * **Frontend:** Next.js 15, Tailwind CSS, TypeScript
 * **Backend & Database:** Convex
 * **Authentication:** Clerk
+*  **AI Usage:** OpenRouter
 * **Deployment:** Vercel
+
 
 ## Architectural Diagram
 
@@ -31,6 +36,7 @@ graph TD
     classDef frontend fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20;
     classDef backend fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#bf360c;
     classDef auth fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px,color:#4a148c;
+    classDef external fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#b71c1c;
 
     %% --- NODES ---
     subgraph Client_Device ["Client Device"]
@@ -45,11 +51,18 @@ graph TD
         Clerk["Clerk"]:::auth
     end
 
-    subgraph Convex_BaaS ["Convex"]
+    subgraph Convex_BaaS ["Convex Backend"]
         direction TB
         ConvexEngine["Convex Engine"]:::backend
+        ConvexActions["Convex Actions"]:::backend
         ConvexDB[("Database")]:::backend
+        
         ConvexEngine <--> ConvexDB
+        ConvexActions <-->|"Reads Context & Writes Reply"| ConvexDB
+    end
+
+    subgraph External_APIs ["External Services"]
+        OpenRouter["OpenRouter (LLM API)"]:::external
     end
 
     %% --- DATA FLOWS ---
@@ -60,15 +73,20 @@ graph TD
     Clerk -- "3. Returns Secure Token" --> NextJS
     NextJS -- "4. Serves UI + Token" --> Browser
 
-    %% 2. Server-to-Backend Connection (New)
-    NextJS -. "5. Configures Client & Optional SSR" .-> ConvexEngine
+    %% 2. Server-to-Backend Connection
+    NextJS -. "5. Configures Client" .-> ConvexEngine
 
-    %% 3. Real-time Connection established from Client browser
-    Browser == "6. Establishes Secure WebSocket Connection" ==> ConvexEngine
+    %% 3. Real-time Connection
+    Browser == "6. Establishes Secure WebSocket" ==> ConvexEngine
 
-    %% 4. User Actions (Mutations)
-    Browser -- "7. Actions (Mutations)" --> ConvexEngine
+    %% 4. User Actions & Real-time Updates
+    Browser -- "7. User Mutations (Send, React, Delete)" --> ConvexEngine
+    ConvexEngine -- "8. Pushes UI Updates (Subscriptions)" --> Browser
 
-    %% 5. Real-time Updates (Subscriptions)
-    ConvexEngine -- "8. Pushes Real-time Data Updates" --> Browser
+    %% 5. AI Agent Flow
+    ConvexEngine -- "9. Triggers Action on @AI Tag" --> ConvexActions
+    ConvexDB -- "10. Fetches Chat Context" --> ConvexActions
+    ConvexActions -- "11. Sends Context & Query" --> OpenRouter
+    OpenRouter -- "12. Returns AI Response" --> ConvexActions
+    ConvexActions -- "13. Writes AI Reply" --> ConvexDB
 ```
