@@ -52,7 +52,11 @@ export const getUsers = query({
 
     let users = await ctx.db.query("users").collect();
 
-    users = users.filter((user) => user.clerkId !== identity.subject);
+    users = users.filter(
+      (user) =>
+        user.clerkId !== identity.subject &&
+        user.clerkId !== "system_ai",
+    );
 
     if (args.searchTerm) {
       const search = args.searchTerm.toLowerCase();
