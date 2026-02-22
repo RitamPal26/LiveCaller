@@ -153,7 +153,7 @@ export function ChatArea({
               />
             ))}
 
-            {isAiThinking && <TypingIndicator />}
+            {isAiThinking && <TypingIndicator activeTypists={["AI Agent"]} />}
           </>
         )}
         <div ref={messagesEndRef} />
