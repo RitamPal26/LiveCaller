@@ -165,9 +165,32 @@ export const getConversation = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
 
+    const currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    if (!currentUser) return null;
+
     const conv = await ctx.db.get(args.conversationId);
     if (!conv) return null;
 
-    return conv;
+    const participants = await Promise.all(
+      conv.participantIds.map((id) => ctx.db.get(id)),
+    );
+
+    const validParticipants = participants.filter((p) => p !== null);
+
+    const otherUser = validParticipants.find((p) => p._id !== currentUser._id);
+
+    const participantNames = conv.isGroup
+      ? validParticipants.map((p) => p.name?.split(" ")[0] || "User").join(", ")
+      : null;
+
+    return {
+      ...conv,
+      otherUser: conv.isGroup ? null : otherUser,
+      participantNames,
+    };
   },
 });

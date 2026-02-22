@@ -6,12 +6,12 @@ import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ArrowLeft } from "lucide-react";
+import { ChevronDown, ArrowLeft, Users } from "lucide-react";
 
 import { MessageBubble } from "./message-bubble";
 import { ChatInput } from "./chat-input";
 import { TypingIndicator } from "./typing-indicator";
-
+import { UserAvatar } from "./user-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function ChatArea({
@@ -66,18 +66,52 @@ export function ChatArea({
 
   return (
     <div className="flex h-full flex-col bg-slate-950 relative">
-      <div className="flex h-16 items-center border-b border-slate-800 px-4 gap-3 shadow-sm z-10">
+      <div className="flex h-16 items-center border-b border-slate-800 px-4 gap-3 shadow-sm z-10 shrink-0">
         <button
           onClick={() => router.push("/chat")}
           className="md:hidden rounded-full p-2 hover:bg-slate-800 transition-colors"
         >
           <ArrowLeft className="h-5 w-5 text-white" />
         </button>
-        <h2 className="text-lg font-bold text-white">
-          {currentConversation?.isGroup
-            ? currentConversation.groupName
-            : "Chat"}
-        </h2>
+
+        {currentConversation === undefined ? (
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-10 w-10 rounded-full shrink-0" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-3 w-32" />
+            </div>
+          </div>
+        ) : currentConversation === null ? (
+          <h2 className="text-lg font-bold text-white">Chat not found</h2>
+        ) : (
+          <div className="flex items-center gap-3 overflow-hidden">
+            {currentConversation.isGroup ? (
+              <div className="h-10 w-10 rounded-full bg-slate-700 flex items-center justify-center text-white shrink-0 border border-slate-600">
+                <Users className="h-5 w-5 text-slate-300" />
+              </div>
+            ) : (
+              <UserAvatar
+                imageUrl={currentConversation.otherUser?.imageUrl}
+                name={currentConversation.otherUser?.name}
+                size="sm"
+              />
+            )}
+
+            <div className="flex flex-col min-w-0">
+              <h2 className="text-base font-bold text-white leading-tight truncate">
+                {currentConversation.isGroup
+                  ? currentConversation.groupName
+                  : currentConversation.otherUser?.name || "Unknown User"}
+              </h2>
+              <p className="text-xs text-slate-400 truncate">
+                {currentConversation.isGroup
+                  ? currentConversation.participantNames
+                  : currentConversation.otherUser?.email}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div
