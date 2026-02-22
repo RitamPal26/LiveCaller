@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation } from "convex/react";
+import { useState } from "react";
 import { api } from "@convex/_generated/api";
 import { Trash2 } from "lucide-react";
 import { Id } from "@convex/_generated/dataModel";
@@ -53,6 +54,8 @@ export function MessageBubble({
   const deleteMessage = useMutation(api.messages.softDelete);
   const toggleReaction = useMutation(api.messages.toggleReaction);
 
+  const [isOpen, setIsOpen] = useState(false);
+
   const reactionCounts: Record<string, number> = {};
   const myReactions = new Set<string>();
 
@@ -71,7 +74,7 @@ export function MessageBubble({
         </span>
       )}
 
-      <Popover>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
         <div
           className={`flex flex-col relative ${isMe ? "items-end" : "items-start"} max-w-[85%]`}
         >
@@ -124,7 +127,10 @@ export function MessageBubble({
               {ALLOWED_EMOJIS.map((emoji) => (
                 <button
                   key={emoji}
-                  onClick={() => toggleReaction({ messageId: msg._id, emoji })}
+                  onClick={() => {
+                    toggleReaction({ messageId: msg._id, emoji });
+                    setIsOpen(false);
+                  }}
                   className="p-1.5 hover:bg-slate-700 rounded-full transition-colors text-lg"
                   title={`React with ${emoji}`}
                 >
@@ -134,9 +140,12 @@ export function MessageBubble({
             </div>
             {isMe && (
               <>
-                <div className="w-[1px] h-6 bg-slate-700 mx-1" />{" "}
+                <div className="w-[1px] h-6 bg-slate-700 mx-1" />
                 <button
-                  onClick={() => deleteMessage({ messageId: msg._id })}
+                  onClick={() => {
+                    deleteMessage({ messageId: msg._id });
+                    setIsOpen(false);
+                  }}
                   className="p-2 text-slate-500 hover:text-red-500 transition-colors bg-slate-800 rounded-full"
                   title="Delete Message"
                 >
