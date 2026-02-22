@@ -51,6 +51,7 @@ export const send = mutation({
   },
 });
 
+// Soft delete a message
 export const softDelete = mutation({
   args: { messageId: v.id("messages") },
   handler: async (ctx, args) => {
@@ -78,6 +79,7 @@ export const softDelete = mutation({
   },
 });
 
+// Toggle a reaction for a message
 export const toggleReaction = mutation({
   args: {
     messageId: v.id("messages"),

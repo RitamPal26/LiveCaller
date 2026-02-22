@@ -13,13 +13,13 @@ interface UserProps {
   isOnline?: boolean;
 }
 
-// Around line 14:
 interface ConversationProps {
   _id: Id<"conversations">;
   unreadCount: number;
   isGroup?: boolean;
   groupName?: string;
   otherUser?: UserProps | null;
+  participantCount?: number;
   lastMessage?: {
     _id: Id<"messages">;
     _creationTime: number;
@@ -79,7 +79,7 @@ export function ConversationList({
         const lastMessage = conv.lastMessage;
 
         const displayName = conv.isGroup
-          ? conv.groupName
+          ? `${conv.groupName} (${conv.participantCount})`
           : otherUser?.name || "Unknown User";
         const displayImage = conv.isGroup ? undefined : otherUser?.imageUrl;
         const isOnline = conv.isGroup ? false : checkIsOnline(otherUser);

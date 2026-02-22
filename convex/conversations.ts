@@ -109,6 +109,7 @@ export const listActive = query({
           _id: conv._id,
           isGroup: conv.isGroup,
           groupName: conv.groupName,
+          participantCount: conv.participantIds.length,
           otherUser: otherUser,
           lastMessage: lastMessage
             ? {
