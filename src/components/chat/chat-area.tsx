@@ -75,7 +75,7 @@ export function ChatArea({
   }, [messages, conversationId, markRead]);
 
   return (
-    <div className="flex h-full flex-col bg-slate-950 relative">
+    <div className="flex h-full flex-col bg-yellow relative">
       <div className="flex h-16 items-center border-b border-slate-800 px-4 gap-3 shadow-sm z-10 shrink-0">
         <button
           onClick={() => router.push("/chat")}
