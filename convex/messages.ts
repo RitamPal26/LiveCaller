@@ -11,6 +11,22 @@ import { api } from "./_generated/api";
 export const list = query({
   args: { conversationId: v.id("conversations") },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+    if (!user) throw new Error("User not found");
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) throw new Error("Conversation not found");
+
+    if (!conversation.participantIds.includes(user._id)) {
+      throw new Error("Forbidden: You are not a participant in this chat.");
+    }
+
     const messages = await ctx.db
       .query("messages")
       .withIndex("by_conversationId", (q) =>
@@ -48,6 +64,13 @@ export const send = mutation({
       .unique();
 
     if (!user) throw new Error("User not found");
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation) throw new Error("Conversation not found");
+
+    if (!conversation.participantIds.includes(user._id)) {
+      throw new Error("Forbidden: You are not a participant in this chat.");
+    }
 
     await ctx.db.insert("messages", {
       conversationId: args.conversationId,
@@ -110,6 +133,13 @@ export const toggleReaction = mutation({
     const message = await ctx.db.get(args.messageId);
     if (!message) throw new Error("Message not found");
 
+    const conversation = await ctx.db.get(message.conversationId);
+    if (!conversation) throw new Error("Conversation not found");
+
+    if (!conversation.participantIds.includes(user._id)) {
+      throw new Error("Forbidden: You cannot react to messages in this chat.");
+    }
+
     const currentReactions = message.reactions || [];
 
     const existingIndex = currentReactions.findIndex(
@@ -151,10 +181,16 @@ export const getHistoryForAi = internalQuery({
       .order("desc")
       .take(20);
 
-    return messages.reverse().map((msg) => ({
-      content: msg.content,
-      isAi: false,
-    }));
+    return Promise.all(
+      messages.reverse().map(async (msg) => {
+        const sender = await ctx.db.get(msg.senderId);
+        return {
+          content: msg.content,
+          isAi: sender?.clerkId === "system_ai",
+          senderName: sender?.name || "Unknown User",
+        };
+      }),
+    );
   },
 });
 

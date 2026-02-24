@@ -175,6 +175,12 @@ export const getConversation = query({
     const conv = await ctx.db.get(args.conversationId);
     if (!conv) return null;
 
+    if (!conv.participantIds.includes(currentUser._id)) {
+      throw new Error(
+        "Forbidden: You are not a participant in this conversation.",
+      );
+    }
+
     const participants = await Promise.all(
       conv.participantIds.map((id) => ctx.db.get(id)),
     );
